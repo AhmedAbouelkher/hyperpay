@@ -11,6 +11,12 @@ class TestConfig implements HyperpayConfig {
   Uri statusEndpoint = _statusEndpoint;
   @override
   PaymentMode paymentMode = PaymentMode.test;
+
+  @override
+  String? applePayEntityID = '';
+
+  @override
+  String? stcPayEntityID = '';
 }
 
 class LiveConfig implements HyperpayConfig {
@@ -24,6 +30,12 @@ class LiveConfig implements HyperpayConfig {
   Uri statusEndpoint = _statusEndpoint;
   @override
   PaymentMode paymentMode = PaymentMode.live;
+
+  @override
+  String? applePayEntityID = '';
+
+  @override
+  String? stcPayEntityID = '';
 }
 
 // Setup using your own endpoints.

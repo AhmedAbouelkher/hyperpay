@@ -63,10 +63,7 @@ class HyperpayPlugin {
       final Response response = await post(
         _config.checkoutEndpoint,
         headers: _checkoutSettings?.headers,
-        body: (_checkoutSettings?.headers['Content-Type'] ?? '') ==
-                'application/json'
-            ? json.encode(body)
-            : body,
+        body: (_checkoutSettings?.headers['Content-Type'] ?? '') == 'application/json' ? json.encode(body) : body,
       );
 
       if (response.statusCode != 200) {
@@ -87,8 +84,7 @@ class HyperpayPlugin {
               _resBody.containsKey('parameterErrors')
                   ? _resBody['parameterErrors']
                       .map(
-                        (param) =>
-                            '(param: ${param['name']}, value: ${param['value']})',
+                        (param) => '(param: ${param['name']}, value: ${param['value']})',
                       )
                       .join(',')
                   : '',
@@ -146,8 +142,7 @@ class HyperpayPlugin {
       final String code = status['code'];
 
       if (code.paymentStatus == PaymentStatus.rejected) {
-        throw HyperpayException(
-            "Rejected payment.", code, status['description']);
+        throw HyperpayException("Rejected payment.", code, status['description']);
       } else {
         log('${code.paymentStatus}', name: "HyperpayPlugin/paymentStatus");
 
@@ -162,10 +157,94 @@ class HyperpayPlugin {
     }
   }
 
+  /// Perform the STC Pay transaction using iOS/Android HyperPay SDK.
+  ///
+  /// It's highly recommended to setup a listner using
+  /// [HyperPay webhooks](https://wordpresshyperpay.docs.oppwa.com/tutorials/webhooks),
+  /// and perform the requird action after payment (e.g. issue receipt) on your server.
+  Future<PaymentStatus> payWithSTC() async {
+    try {
+      final result = await _channel.invokeMethod(
+        'start_stc_pay_transaction',
+        {'checkoutID': _checkoutID},
+      );
+
+      log('$result', name: "HyperpayPlugin/platformResponse");
+
+      if (result == 'canceled') {
+        // Checkout session is still going on.
+        return PaymentStatus.init;
+      }
+
+      final status = await paymentStatus(
+        _checkoutID,
+        headers: _checkoutSettings?.headers,
+      );
+      final String code = status['code'];
+
+      if (code.paymentStatus == PaymentStatus.rejected) {
+        throw HyperpayException("Rejected payment.", code, status['description']);
+      } else {
+        log('${code.paymentStatus}', name: "HyperpayPlugin/paymentStatus");
+
+        _clearSession();
+        _checkoutID = '';
+
+        return code.paymentStatus;
+      }
+    } catch (e) {
+      log('$e', name: "HyperpayPlugin/payWithSTC");
+      rethrow;
+    }
+  }
+
+  /// Perform the Apple transaction using iOS/Android HyperPay SDK.
+  ///
+  /// It's highly recommended to setup a listner using
+  /// [HyperPay webhooks](https://wordpresshyperpay.docs.oppwa.com/tutorials/webhooks),
+  /// and perform the requird action after payment (e.g. issue receipt) on your server.
+  Future<PaymentStatus> payWithApplePay(ApplePayConfigs configs) async {
+    try {
+      final result = await _channel.invokeMethod(
+        'start_apple_pay_transaction',
+        {
+          'checkoutID': _checkoutID,
+          ...configs.toMap(),
+        },
+      );
+
+      log('$result', name: "HyperpayPlugin/platformResponse");
+
+      if (result == 'canceled') {
+        // Checkout session is still going on.
+        return PaymentStatus.init;
+      }
+
+      final status = await paymentStatus(
+        _checkoutID,
+        headers: _checkoutSettings?.headers,
+      );
+      final String code = status['code'];
+
+      if (code.paymentStatus == PaymentStatus.rejected) {
+        throw HyperpayException("Rejected payment.", code, status['description']);
+      } else {
+        log('${code.paymentStatus}', name: "HyperpayPlugin/paymentStatus");
+
+        _clearSession();
+        _checkoutID = '';
+
+        return code.paymentStatus;
+      }
+    } catch (e) {
+      log('$e', name: "HyperpayPlugin/payWithApplePay");
+      rethrow;
+    }
+  }
+
   /// Check for payment status using a checkout ID, this method is called
   /// once right after a transaction.
-  Future<Map<String, dynamic>> paymentStatus(String checkoutID,
-      {Map<String, String>? headers}) async {
+  Future<Map<String, dynamic>> paymentStatus(String checkoutID, {Map<String, String>? headers}) async {
     try {
       final body = {
         'entityID': _checkoutSettings?.brand.entityID(config),
@@ -174,10 +253,7 @@ class HyperpayPlugin {
       final Response response = await post(
         _config.statusEndpoint,
         headers: headers,
-        body: (_checkoutSettings?.headers['Content-Type'] ?? '') ==
-                'application/json'
-            ? json.encode(body)
-            : body,
+        body: (_checkoutSettings?.headers['Content-Type'] ?? '') == 'application/json' ? json.encode(body) : body,
       );
 
       final Map<String, dynamic> _resBody = json.decode(response.body);

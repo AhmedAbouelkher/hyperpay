@@ -17,6 +17,8 @@ part of hyperpay;
 class HyperpayConfig {
   String? creditcardEntityID;
   String? madaEntityID;
+  String? applePayEntityID;
+  String? stcPayEntityID;
   late Uri checkoutEndpoint;
   late Uri statusEndpoint;
   PaymentMode paymentMode = PaymentMode.none;

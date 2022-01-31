@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
+import 'package:hyperpay/src/models/apple_pay_configs.dart';
 
 part 'src/hyperpay.dart';
 part 'src/config.dart';

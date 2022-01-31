@@ -18,8 +18,7 @@ extension DetectBrand on String {
   BrandType get detectBrand {
     final cleanNumber = this.replaceAll(' ', '');
 
-    bool _isMADA = _madaRegExpM.hasMatch(cleanNumber) ||
-        _madaRegExpV.hasMatch(cleanNumber);
+    bool _isMADA = _madaRegExpM.hasMatch(cleanNumber) || _madaRegExpV.hasMatch(cleanNumber);
     bool _isVISA = _visaRegExp.hasMatch(cleanNumber);
     bool _isMASTERCARD = _mastercardRegExp.hasMatch(cleanNumber);
 
@@ -47,6 +46,10 @@ extension BrandTypeExtension on BrandType {
         return 'MASTER';
       case BrandType.mada:
         return 'MADA';
+      case BrandType.stc_pay:
+        return 'STC Pay';
+      case BrandType.apple_pay:
+        return 'Apple Pay';
       default:
         return '';
     }
@@ -64,6 +67,12 @@ extension BrandTypeExtension on BrandType {
         break;
       case BrandType.mada:
         _entityID = config.madaEntityID;
+        break;
+      case BrandType.apple_pay:
+        _entityID = config.applePayEntityID;
+        break;
+      case BrandType.stc_pay:
+        _entityID = config.stcPayEntityID;
         break;
 
       default:
@@ -98,8 +107,7 @@ extension BrandTypeExtension on BrandType {
           return "Inavlid MASTER CARD number";
         }
       case BrandType.mada:
-        if (_madaRegExpV.hasMatch(cleanNumber) ||
-            _madaRegExpM.hasMatch(cleanNumber)) {
+        if (_madaRegExpV.hasMatch(cleanNumber) || _madaRegExpM.hasMatch(cleanNumber)) {
           return null;
         } else if (cleanNumber.isEmpty) {
           return "Required";
