@@ -261,8 +261,6 @@ public class SwiftHyperpayPlugin: NSObject, FlutterPlugin, SFSafariViewControlle
                 
                 let checkoutProvider = OPPCheckoutProvider(paymentProvider: self.provider, checkoutID: checkoutID, settings: checkoutSettings)
                 
-                checkoutProvider?.delegate = self
-                
                 //Open Ready UI
                 
                 checkoutProvider?.presentCheckout(withPaymentBrand: "APPLEPAY",
@@ -394,13 +392,6 @@ public class SwiftHyperpayPlugin: NSObject, FlutterPlugin, SFSafariViewControlle
     }
     
 }
-
-
-extension SwiftHyperpayPlugin: OPPCheckoutProviderDelegate {
-    
-    
-}
-
 
 extension UIColor {
     convenience init?(hexaRGB: String, alpha: CGFloat = 1) {

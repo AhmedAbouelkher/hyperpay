@@ -25,5 +25,7 @@ A new flutter plugin project.
   s.xcconfig = { 'OTHER_LDFLAGS' => '-framework OPPWAMobile' }
   s.vendored_frameworks = 'OPPWAMobile.xcframework'
   s.static_framework = true
+  s.swift_version = '5.0'
+  s.public_header_files = 'Classes/**/*.h'
 
 end
